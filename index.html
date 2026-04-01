@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Einkauf">
+<meta name="theme-color" content="#1a1a18">
+<title>Einkaufsliste</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f3ef;
+  --bg2: #eceae4;
+  --bg3: #ffffff;
+  --ink: #1a1a18;
+  --ink2: #5a5a54;
+  --ink3: #9a9a90;
+  --accent: #2d6a4f;
+  --accent2: #40916c;
+  --red: #c1440e;
+  --border: rgba(26,26,24,0.12);
+  --border2: rgba(26,26,24,0.22);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a;--bg2:#222226;--bg3:#2c2c30;
+    --ink:#f0ede8;--ink2:#a0a098;--ink3:#606058;
+    --accent:#52b788;--accent2:#74c69d;
+    --red:#e07050;--border:rgba(240,237,232,0.1);--border2:rgba(240,237,232,0.2);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5}
+.app{display:flex;flex-direction:column;height:100%;height:100dvh}
+
+/* Header */
+.header{padding:calc(var(--safe-top) + 16px) 20px 12px;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0}
+.header-top{display:flex;align-items:center;justify-content:space-between}
+.header h1{font-family:'DM Serif Display',serif;font-size:26px;font-weight:400;letter-spacing:-0.5px}
+.header-sub{font-size:12px;color:var(--ink3);margin-top:2px}
+
+/* Nav */
+.nav{display:flex;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex:1;min-width:80px;padding:12px 8px;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink3);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
+
+/* Main scroll */
+.main{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 0 calc(var(--safe-bottom) + 80px);-webkit-overflow-scrolling:touch}
+.page{display:none;padding:16px}
+.page.active{display:block}
+
+/* Cards */
+.card{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:500;color:var(--ink2);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em}
+
+/* Forms */
+.field{margin-bottom:10px}
+.field label{display:block;font-size:12px;color:var(--ink2);margin-bottom:4px;font-weight:500}
+input[type=text],input[type=number],select,textarea{width:100%;height:42px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:0 12px;font-family:'DM Sans',sans-serif;font-size:15px;background:var(--bg);color:var(--ink);outline:none;appearance:none;-webkit-appearance:none;transition:border-color .15s}
+input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--accent)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9a90' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:42px;padding:0 18px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:opacity .15s,transform .1s;white-space:nowrap}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{opacity:0.9}
+.btn-outline{background:transparent;border:0.5px solid var(--border2);color:var(--ink)}
+.btn-danger{background:transparent;border:0.5px solid var(--red);color:var(--red)}
+.btn-sm{height:32px;padding:0 12px;font-size:13px}
+.btn-icon{width:38px;height:38px;padding:0;border-radius:50%}
+.btn-full{width:100%}
+
+/* Listen */
+.liste-card{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
+.liste-card:hover{border-color:var(--border2)}
+.liste-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.liste-card-name{font-size:17px;font-weight:500;letter-spacing:-0.2px}
+.liste-card-meta{font-size:12px;color:var(--ink3)}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;background:var(--bg2);color:var(--ink2)}
+.badge-green{background:rgba(45,106,79,0.12);color:var(--accent)}
+
+/* Artikel-Reihe */
+.artikel-gruppe-header{font-size:11px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:0.08em;padding:12px 0 6px;border-bottom:0.5px solid var(--border)}
+.artikel-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:0.5px solid var(--border)}
+.artikel-row:last-child{border-bottom:none}
+.check-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.check-btn.done{background:var(--accent);border-color:var(--accent);color:#fff}
+.check-btn svg{opacity:0;transition:opacity .2s}
+.check-btn.done svg{opacity:1}
+.artikel-name{flex:1;font-size:15px}
+.artikel-name.done{text-decoration:line-through;color:var(--ink3)}
+.artikel-menge{font-size:13px;color:var(--ink3);margin-right:4px}
+
+/* Preis Eingabe */
+.preis-wrap{display:flex;align-items:center;gap:4px}
+.preis-input{width:80px;height:32px;font-size:13px;padding:0 8px;border:.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg2);color:var(--ink);font-family:'DM Sans',sans-serif}
+.preis-input:focus{border-color:var(--accent);outline:none}
+.save-btn{width:32px;height:32px;border-radius:50%;background:var(--accent);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-box{background:var(--bg2);border-radius:var(--radius-sm);padding:12px 14px}
+.stat-val{font-size:22px;font-weight:500;font-family:'DM Serif Display',serif}
+.stat-lbl{font-size:11px;color:var(--ink3);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em}
+
+/* Historie */
+.hist-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border)}
+.hist-row:last-child{border-bottom:none}
+.hist-name{font-size:14px;font-weight:500}
+.hist-meta{font-size:11px;color:var(--ink3);margin-top:2px}
+.hist-preis{font-size:15px;font-weight:500;color:var(--accent);white-space:nowrap}
+
+/* Chips */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{padding:6px 12px;border-radius:20px;font-size:12px;border:0.5px solid var(--border2);background:transparent;color:var(--ink2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* FAB */
+.fab{position:fixed;bottom:calc(var(--safe-bottom) + 20px);right:20px;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;z-index:100;transition:transform .15s}
+.fab:active{transform:scale(0.94)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-height:92dvh;overflow-y:auto;padding:20px 20px calc(var(--safe-bottom) + 20px);transform:translateY(20px);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px}
+.modal-close{width:32px;height:32px;border-radius:50%;border:.5px solid var(--border2);background:transparent;color:var(--ink);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+
+/* Row helpers */
+.row{display:flex;gap:8px;align-items:flex-end}
+.row .field{flex:1}
+
+/* Empty state */
+.empty{text-align:center;padding:40px 20px;color:var(--ink3)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.empty-text{font-size:15px}
+
+/* Install banner */
+.install-banner{background:var(--accent);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;font-size:13px;border-radius:var(--radius-sm);margin-bottom:12px}
+.install-banner button{background:rgba(255,255,255,0.25);border:none;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+/* Vorlage-Liste */
+.vorlage-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.vorlage-chip{padding:5px 11px;border-radius:20px;font-size:12px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--ink2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.vorlage-chip:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Progress bar */
+.progress-wrap{height:4px;background:var(--bg2);border-radius:2px;margin-top:8px;overflow:hidden}
+.progress-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
+
+/* Toast */
+.toast{position:fixed;bottom:calc(var(--safe-bottom) + 80px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-top">
+      <h1>🛒 Einkaufsliste</h1>
+      <div id="header-actions"></div>
+    </div>
+    <div class="header-sub" id="header-sub">Deine persönliche Einkaufs-App</div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" data-tab="listen">Listen</button>
+    <button class="nav-btn" data-tab="einkauf">Einkaufen</button>
+    <button class="nav-btn" data-tab="verlauf">Verlauf</button>
+    <button class="nav-btn" data-tab="einstellungen">Einstellungen</button>
+  </nav>
+
+  <main class="main">
+    <div id="page-listen" class="page active"></div>
+    <div id="page-einkauf" class="page"></div>
+    <div id="page-verlauf" class="page"></div>
+    <div id="page-einstellungen" class="page"></div>
+  </main>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== DATENBANK =====
+const DB = 'einkauf_pwa_v1';
+function loadDB(){
+  try{ return JSON.parse(localStorage.getItem(DB)||'null') || {listen:[],kaeufe:[],supermaerkte:[...STANDARD_MAERKTE],kategorien:[...STANDARD_KATS]} }
+  catch(e){ return {listen:[],kaeufe:[],supermaerkte:[...STANDARD_MAERKTE],kategorien:[...STANDARD_KATS]} }
+}
+function saveDB(){ localStorage.setItem(DB, JSON.stringify(db)) }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2) }
+function fmt(n){ return (parseFloat(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €' }
+function fmtDate(d){ return new Date(d).toLocaleDateString('de-DE') }
+
+const STANDARD_MAERKTE = ['REWE','Aldi','Lidl','Famila','K&K'];
+const STANDARD_KATS = ['Obst & Gemüse','Fleisch & Wurst','Backwaren','Süßigkeiten','Milch-Produkte','Kühlung','Spirituosen','Getränke','Körperpflege','Sanitär','Sonstiges'];
+const VORLAGEN = {
+  'Milch-Produkte':['Milch','Butter','Margarine','Joghurt','Käse','Quark','Pudding','Frischkäse','Runder Kräuterkäse','Milch laktosefrei','Hummus-Aufstrich'],
+  'Obst & Gemüse':['Äpfel','Bananen','Tomaten','Gurke','Karotten','Zitrone','Salat','Paprika','Zwiebeln','Knoblauch'],
+  'Fleisch & Wurst':['Hähnchenbrust','Schweineschnitzel','Rinderhack','Salami','Schinken','Leberwurst'],
+  'Backwaren':['Toastbrot','Brötchen','Baguette','Vollkornbrot','Croissant'],
+  'Getränke':['Wasser','Apfelsaft','Cola','Bier','Orangensaft','Tee','Kaffee'],
+  'Süßigkeiten':['Schokolade','Kekse','Gummibärchen','Chips','Müsliriegel'],
+  'Kühlung':['Aufschnitt','Fertiggericht','Tiefkühlpizza','Eis','Sahne'],
+  'Spirituosen':['Rotwein','Weißwein','Sekt','Bier','Whisky'],
+  'Körperpflege':['Shampoo','Duschgel','Zahnpasta','Deo','Rasiergel'],
+  'Sanitär':['Toilettenpapier','Taschentücher','Seife','Waschmittel','Spülmittel'],
+  'Sonstiges':[]
+};
+
+let db = loadDB();
+let aktiveListeId = null;
+let aktiveTab = 'listen';
+let deferredInstall = null;
+let filterVerlauf = {markt:'',kat:''};
+
+// ===== NAVIGATION =====
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    aktiveTab = btn.dataset.tab;
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-'+aktiveTab).classList.add('active');
+    renderPage();
+  });
+});
+
+function renderPage(){
+  if(aktiveTab==='listen') renderListen();
+  else if(aktiveTab==='einkauf') renderEinkauf();
+  else if(aktiveTab==='verlauf') renderVerlauf();
+  else if(aktiveTab==='einstellungen') renderEinstellungen();
+  updateHeader();
+}
+
+function updateHeader(){
+  const sub = document.getElementById('header-sub');
+  if(aktiveTab==='einkauf' && aktiveListeId){
+    const l = db.listen.find(l=>l.id===aktiveListeId);
+    sub.textContent = l ? `${l.name} · ${l.supermarkt||'Kein Markt'}` : '';
+  } else {
+    sub.textContent = 'Deine persönliche Einkaufs-App';
+  }
+}
+
+// ===== LISTEN-TAB =====
+function renderListen(){
+  const p = document.getElementById('page-listen');
+  let html = '';
+
+  if(deferredInstall){
+    html += `<div class="install-banner">
+      <span>📲 App auf dem Homescreen installieren</span>
+      <button onclick="installApp()">Installieren</button>
+    </div>`;
+  }
+
+  html += `<div class="card">
+    <div class="card-title">Neue Liste</div>
+    <div class="field"><label>Listenname</label><input type="text" id="new-name" placeholder="z.B. Wocheneinkauf"></div>
+    <div class="row">
+      <div class="field"><label>Supermarkt</label>
+        <select id="new-markt">
+          <option value="">– Kein Markt –</option>
+          ${db.supermaerkte.map(m=>`<option>${m}</option>`).join('')}
+          <option value="__neu__">+ Neuer Markt</option>
+        </select>
+      </div>
+    </div>
+    <div id="new-markt-extra" style="display:none;margin-top:8px">
+      <input type="text" id="new-markt-name" placeholder="Markt-Name eingeben">
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:12px" onclick="neueListeAnlegen()">Liste erstellen</button>
+  </div>`;
+
+  if(db.listen.length === 0){
+    html += `<div class="empty"><div class="empty-icon">🛍️</div><div class="empty-text">Noch keine Listen.<br>Erstelle deine erste Einkaufsliste!</div></div>`;
+  } else {
+    db.listen.forEach(l => {
+      const gesamt = l.artikel.length;
+      const erledigt = l.artikel.filter(a=>a.erledigt).length;
+      const pct = gesamt ? Math.round(erledigt/gesamt*100) : 0;
+      html += `<div class="liste-card" onclick="listeAuswählen('${l.id}')">
+        <div class="liste-card-header">
+          <div>
+            <div class="liste-card-name">${l.name}</div>
+            <div class="liste-card-meta">${l.supermarkt||'Kein Markt'} · ${gesamt} Artikel</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            ${pct===100?'<span class="badge badge-green">✓ Fertig</span>':'<span class="badge">'+erledigt+'/'+gesamt+'</span>'}
+            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();listeLöschen('${l.id}')">Löschen</button>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+      </div>`;
+    });
+  }
+  p.innerHTML = html;
+
+  document.getElementById('new-markt')?.addEventListener('change', function(){
+    document.getElementById('new-markt-extra').style.display = this.value==='__neu__' ? 'block' : 'none';
+  });
+}
+
+window.neueListeAnlegen = function(){
+  const name = document.getElementById('new-name').value.trim();
+  if(!name){ toast('Bitte Listenname eingeben'); return; }
+  const marktSel = document.getElementById('new-markt').value;
+  let markt = marktSel;
+  if(marktSel==='__neu__'){
+    markt = document.getElementById('new-markt-name').value.trim();
+    if(markt && !db.supermaerkte.includes(markt)){ db.supermaerkte.push(markt); }
+  }
+  db.listen.push({id:uid(), name, supermarkt:markt||'', artikel:[]});
+  saveDB();
+  toast('Liste erstellt!');
+  renderListen();
+};
+
+window.listeLöschen = function(id){
+  if(!confirm('Liste wirklich löschen?')) return;
+  db.listen = db.listen.filter(l=>l.id!==id);
+  if(aktiveListeId===id) aktiveListeId=null;
+  saveDB(); renderListen();
+};
+
+window.listeAuswählen = function(id){
+  aktiveListeId = id;
+  aktiveTab = 'einkauf';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab==='einkauf'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-einkauf').classList.add('active');
+  renderPage();
+};
+
+// ===== EINKAUF-TAB =====
+function renderEinkauf(){
+  const p = document.getElementById('page-einkauf');
+
+  if(!aktiveListeId){
+    if(db.listen.length===0){
+      p.innerHTML=`<div class="empty"><div class="empty-icon">🛒</div><div class="empty-text">Zuerst eine Liste anlegen.</div></div>`;
+      return;
+    }
+    let html = `<div class="card-title" style="padding:4px 0 10px">Liste wählen</div>`;
+    db.listen.forEach(l=>{
+      html+=`<div class="liste-card" onclick="aktiveListeId='${l.id}';renderPage()">
+        <div class="liste-card-name">${l.name}</div>
+        <div class="liste-card-meta">${l.supermarkt||'Kein Markt'} · ${l.artikel.length} Artikel</div>
+      </div>`;
+    });
+    p.innerHTML=html; return;
+  }
+
+  const liste = db.listen.find(l=>l.id===aktiveListeId);
+  if(!liste){ aktiveListeId=null; renderEinkauf(); return; }
+
+  const offen = liste.artikel.filter(a=>!a.erledigt);
+  const erledigt = liste.artikel.filter(a=>a.erledigt);
+
+  let html = `<button class="btn btn-outline btn-sm" style="margin-bottom:12px" onclick="aktiveListeId=null;renderPage()">← Andere Liste</button>`;
+
+  // Artikel hinzufügen
+  html += `<div class="card">
+    <div class="card-title">Artikel hinzufügen</div>
+    <div class="row">
+      <div class="field" style="flex:1"><label>Kategorie</label>
+        <select id="kat-sel" onchange="updateVorlagen()">${db.kategorien.map(k=>`<option>${k}</option>`).join('')}<option value="__neukat__">+ Neue Kategorie</option></select>
+      </div>
+    </div>
+    <div id="neukat-row" style="display:none;margin-top:8px"><input type="text" id="neukat-name" placeholder="Kategorie-Name"></div>
+    <div id="vorlagen-wrap" style="margin-top:8px"></div>
+    <div class="field" style="margin-top:10px"><label>Produkt (manuell)</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="prod-name" placeholder="Produkt eingeben..." style="flex:1">
+        <input type="number" id="prod-menge" value="1" min="1" style="width:65px" placeholder="Anz.">
+        <button class="btn btn-primary" onclick="artikelHinzufügen()">+</button>
+      </div>
+    </div>
+  </div>`;
+
+  // Offene Artikel nach Kategorie
+  if(offen.length > 0){
+    html += `<div class="card"><div class="card-title">Zu kaufen (${offen.length})</div>`;
+    const gruppen = {};
+    offen.forEach(a=>{ const k=a.kategorie||'Sonstiges'; if(!gruppen[k])gruppen[k]=[]; gruppen[k].push(a); });
+    Object.entries(gruppen).forEach(([kat,items])=>{
+      html += `<div class="artikel-gruppe-header">${kat}</div>`;
+      items.forEach(a=>{
+        html += `<div class="artikel-row">
+          <button class="check-btn" onclick="toggleArtikel('${liste.id}','${a.id}')" title="Erledigt">
+            <svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5l3 3 7-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          </button>
+          <span class="artikel-name">${a.name}</span>
+          ${a.menge>1?`<span class="artikel-menge">${a.menge}×</span>`:''}
+          <button class="btn btn-sm btn-danger btn-icon" style="flex-shrink:0" onclick="artikelLöschen('${liste.id}','${a.id}')">×</button>
+        </div>`;
+      });
+    });
+    html += `</div>`;
+  }
+
+  // Erledigte Artikel
+  if(erledigt.length > 0){
+    html += `<div class="card">
+      <div class="card-title" style="color:var(--ink3)">Erledigt (${erledigt.length})</div>`;
+    erledigt.forEach(a=>{
+      html += `<div class="artikel-row">
+        <button class="check-btn done" onclick="toggleArtikel('${liste.id}','${a.id}')" title="Rückgängig">
+          <svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5l3 3 7-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        </button>
+        <span class="artikel-name done">${a.name}${a.menge>1?' ('+a.menge+'×)':''}</span>
+        <div class="preis-wrap">
+          <input class="preis-input" type="number" step="0.01" min="0" placeholder="€" value="${a.preis||''}"
+            onchange="preisSetzen('${liste.id}','${a.id}',this.value)" title="Preis eintragen">
+          <button class="save-btn" onclick="kaufSpeichern('${liste.id}','${a.id}')" title="Kauf speichern">💾</button>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if(liste.artikel.length===0){
+    html += `<div class="empty"><div class="empty-icon">✏️</div><div class="empty-text">Liste ist leer.<br>Artikel oben hinzufügen.</div></div>`;
+  }
+
+  p.innerHTML = html;
+  updateVorlagen();
+  document.getElementById('kat-sel')?.addEventListener('change', function(){
+    document.getElementById('neukat-row').style.display = this.value==='__neukat__' ? 'block' : 'none';
+    updateVorlagen();
+  });
+}
+
+window.updateVorlagen = function(){
+  const sel = document.getElementById('kat-sel');
+  if(!sel) return;
+  const kat = sel.value;
+  const items = VORLAGEN[kat] || [];
+  const wrap = document.getElementById('vorlagen-wrap');
+  if(!wrap) return;
+  if(items.length===0){ wrap.innerHTML=''; return; }
+  wrap.innerHTML = `<div style="font-size:11px;color:var(--ink3);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:.05em">Schnellauswahl</div><div class="vorlage-list">${items.map(i=>`<button class="vorlage-chip" onclick="schnellHinzufügen('${i}')">${i}</button>`).join('')}</div>`;
+};
+
+window.schnellHinzufügen = function(name){
+  const liste = db.listen.find(l=>l.id===aktiveListeId);
+  const kat = document.getElementById('kat-sel')?.value || 'Sonstiges';
+  liste.artikel.push({id:uid(),name,kategorie:kat,menge:1,erledigt:false,preis:null});
+  saveDB(); toast(name+' hinzugefügt'); renderEinkauf();
+};
+
+window.artikelHinzufügen = function(){
+  const liste = db.listen.find(l=>l.id===aktiveListeId);
+  let kat = document.getElementById('kat-sel')?.value||'Sonstiges';
+  if(kat==='__neukat__'){
+    kat = document.getElementById('neukat-name')?.value.trim()||'Sonstiges';
+    if(kat && !db.kategorien.includes(kat)){ db.kategorien.push(kat); }
+  }
+  const name = document.getElementById('prod-name')?.value.trim();
+  const menge = parseInt(document.getElementById('prod-menge')?.value)||1;
+  if(!name){ toast('Produkt-Name eingeben'); return; }
+  liste.artikel.push({id:uid(),name,kategorie:kat,menge,erledigt:false,preis:null});
+  saveDB(); toast(name+' hinzugefügt'); renderEinkauf();
+};
+
+window.toggleArtikel = function(lid, aid){
+  const liste = db.listen.find(l=>l.id===lid);
+  const a = liste.artikel.find(a=>a.id===aid);
+  a.erledigt = !a.erledigt;
+  saveDB(); renderEinkauf();
+};
+
+window.artikelLöschen = function(lid, aid){
+  const liste = db.listen.find(l=>l.id===lid);
+  liste.artikel = liste.artikel.filter(a=>a.id!==aid);
+  saveDB(); renderEinkauf();
+};
+
+window.preisSetzen = function(lid, aid, val){
+  const liste = db.listen.find(l=>l.id===lid);
+  const a = liste.artikel.find(a=>a.id===aid);
+  a.preis = parseFloat(val)||null;
+  saveDB();
+};
+
+window.kaufSpeichern = function(lid, aid){
+  const liste = db.listen.find(l=>l.id===lid);
+  const a = liste.artikel.find(a=>a.id===aid);
+  if(!a.preis){ toast('Bitte Preis eintragen'); return; }
+  db.kaeufe.push({
+    id:uid(), datum:new Date().toISOString().slice(0,10),
+    artikel:a.name, kategorie:a.kategorie||'Sonstiges',
+    menge:a.menge, preis:a.preis,
+    supermarkt:liste.supermarkt||'Unbekannt', liste:liste.name
+  });
+  saveDB();
+  toast(`${a.name} · ${fmt(a.preis)} gespeichert ✓`);
+};
+
+// ===== VERLAUF-TAB =====
+function renderVerlauf(){
+  const p = document.getElementById('page-verlauf');
+  const k = db.kaeufe;
+
+  if(k.length===0){
+    p.innerHTML=`<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Noch keine Käufe gespeichert.<br>Im Einkaufen-Tab auf 💾 tippen.</div></div>`;
+    return;
+  }
+
+  const maerkte = [...new Set(k.map(x=>x.supermarkt))];
+  const kats = [...new Set(k.map(x=>x.kategorie))];
+  const filtered = k.filter(x=>
+    (!filterVerlauf.markt||x.supermarkt===filterVerlauf.markt) &&
+    (!filterVerlauf.kat||x.kategorie===filterVerlauf.kat)
+  );
+  const summe = filtered.reduce((s,x)=>s+(x.preis||0),0);
+
+  let html = `<div class="stats-grid">
+    <div class="stat-box"><div class="stat-val">${fmt(summe)}</div><div class="stat-lbl">Ausgaben</div></div>
+    <div class="stat-box"><div class="stat-val">${filtered.length}</div><div class="stat-lbl">Einträge</div></div>
+  </div>`;
+
+  // Filter
+  html += `<div class="card"><div class="card-title">Filter</div>
+    <div class="row">
+      <div class="field"><label>Markt</label>
+        <select onchange="filterVerlauf.markt=this.value;renderVerlauf()">
+          <option value="">Alle Märkte</option>${maerkte.map(m=>`<option ${filterVerlauf.markt===m?'selected':''}>${m}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field"><label>Kategorie</label>
+        <select onchange="filterVerlauf.kat=this.value;renderVerlauf()">
+          <option value="">Alle</option>${kats.map(c=>`<option ${filterVerlauf.kat===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+  </div>`;
+
+  // Auswertung nach Markt
+  const perMarkt = {};
+  filtered.forEach(x=>{ if(!perMarkt[x.supermarkt])perMarkt[x.supermarkt]=0; perMarkt[x.supermarkt]+=x.preis||0; });
+  if(Object.keys(perMarkt).length>1){
+    html+=`<div class="card"><div class="card-title">Ausgaben nach Markt</div>`;
+    Object.entries(perMarkt).sort((a,b)=>b[1]-a[1]).forEach(([m,s])=>{
+      const pct=Math.round(s/summe*100);
+      html+=`<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>${m}</span><span>${fmt(s)} (${pct}%)</span></div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  // Kaufhistorie
+  html+=`<div class="card"><div class="card-title">Kaufhistorie</div>`;
+  const sorted=[...filtered].sort((a,b)=>b.datum.localeCompare(a.datum));
+  sorted.slice(0,100).forEach(x=>{
+    html+=`<div class="hist-row">
+      <div><div class="hist-name">${x.artikel}</div><div class="hist-meta">${fmtDate(x.datum)} · ${x.supermarkt} · ${x.kategorie}</div></div>
+      <div class="hist-preis">${fmt(x.preis)}</div>
+    </div>`;
+  });
+  if(filtered.length>100) html+=`<div style="text-align:center;padding:.5rem;font-size:12px;color:var(--ink3)">… ${filtered.length-100} weitere</div>`;
+  html+=`</div>`;
+
+  // Export
+  html+=`<button class="btn btn-outline btn-full" style="margin-top:4px" onclick="exportCSV()">📥 Als CSV exportieren</button>`;
+
+  p.innerHTML=html;
+}
+
+window.exportCSV = function(){
+  const rows=[['Datum','Artikel','Kategorie','Menge','Preis','Supermarkt','Liste']];
+  db.kaeufe.forEach(k=>rows.push([k.datum,k.artikel,k.kategorie,k.menge,(k.preis||0).toFixed(2),k.supermarkt,k.liste]));
+  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='einkauf_export.csv';a.click();
+  toast('CSV exportiert');
+};
+
+// ===== EINSTELLUNGEN =====
+function renderEinstellungen(){
+  const p=document.getElementById('page-einstellungen');
+  let html=`
+  <div class="card">
+    <div class="card-title">Supermärkte verwalten</div>
+    ${db.supermaerkte.map((m,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:.5px solid var(--border)">
+      <span style="font-size:15px">${m}</span>
+      <button class="btn btn-sm btn-danger" onclick="marktLöschen(${i})">Entfernen</button>
+    </div>`).join('')}
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input type="text" id="neuer-markt" placeholder="Neuer Supermarkt" style="flex:1">
+      <button class="btn btn-primary" onclick="marktHinzufügen()">+</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Kategorien verwalten</div>
+    ${db.kategorien.map((k,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:.5px solid var(--border)">
+      <span style="font-size:15px">${k}</span>
+      <button class="btn btn-sm btn-danger" onclick="katLöschen(${i})">Entfernen</button>
+    </div>`).join('')}
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input type="text" id="neue-kat" placeholder="Neue Kategorie" style="flex:1">
+      <button class="btn btn-primary" onclick="katHinzufügen()">+</button>
+    </div>
+  </div>
+  <div class="card" style="border-color:rgba(193,68,14,0.3)">
+    <div class="card-title">Daten</div>
+    <p style="font-size:13px;color:var(--ink2);margin-bottom:12px">Listen: ${db.listen.length} · Kauf-Einträge: ${db.kaeufe.length}</p>
+    <button class="btn btn-danger btn-full" onclick="allesDaten()">🗑️ Alle Daten löschen</button>
+  </div>`;
+  p.innerHTML=html;
+}
+
+window.marktLöschen=function(i){db.supermaerkte.splice(i,1);saveDB();renderEinstellungen()};
+window.marktHinzufügen=function(){
+  const v=document.getElementById('neuer-markt').value.trim();
+  if(!v||db.supermaerkte.includes(v)){toast('Ungültig oder bereits vorhanden');return;}
+  db.supermaerkte.push(v);saveDB();toast(v+' hinzugefügt');renderEinstellungen();
+};
+window.katLöschen=function(i){db.kategorien.splice(i,1);saveDB();renderEinstellungen()};
+window.katHinzufügen=function(){
+  const v=document.getElementById('neue-kat').value.trim();
+  if(!v||db.kategorien.includes(v)){toast('Ungültig oder bereits vorhanden');return;}
+  db.kategorien.push(v);saveDB();toast(v+' hinzugefügt');renderEinstellungen();
+};
+window.allesDaten=function(){
+  if(!confirm('Wirklich ALLE Daten löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.'))return;
+  localStorage.removeItem(DB);db=loadDB();aktiveListeId=null;saveDB();toast('Alle Daten gelöscht');renderPage();
+};
+
+// ===== MODAL =====
+window.closeModal=function(e){
+  if(e.target===document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open');
+};
+
+// ===== TOAST =====
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ===== PWA INSTALL =====
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); deferredInstall=e;
+  if(aktiveTab==='listen') renderListen();
+});
+window.installApp=function(){
+  if(!deferredInstall)return;
+  deferredInstall.prompt();
+  deferredInstall.userChoice.then(()=>{deferredInstall=null;renderPage();});
+};
+
+// ===== SERVICE WORKER =====
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+// ===== DEMO-DATEN =====
+if(db.listen.length===0 && db.kaeufe.length===0){
+  db.listen.push({
+    id:uid(),name:'Wocheneinkauf',supermarkt:'REWE',
+    artikel:[
+      {id:uid(),name:'Milch',kategorie:'Milch-Produkte',menge:2,erledigt:false,preis:null},
+      {id:uid(),name:'Butter',kategorie:'Milch-Produkte',menge:1,erledigt:false,preis:null},
+      {id:uid(),name:'Tomaten',kategorie:'Obst & Gemüse',menge:1,erledigt:true,preis:1.49},
+      {id:uid(),name:'Vollkornbrot',kategorie:'Backwaren',menge:1,erledigt:false,preis:null},
+      {id:uid(),name:'Joghurt',kategorie:'Milch-Produkte',menge:3,erledigt:false,preis:null},
+    ]
+  });
+  saveDB();
+}
+
+// Init
+renderPage();
+</script>
+</body>
+</html>
